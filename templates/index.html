@@ -1,0 +1,699 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Multi-Function Calculator</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+        
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+        
+        .header h1 {
+            font-size: 2.5em;
+            margin-bottom: 10px;
+            font-weight: 300;
+        }
+        
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1em;
+        }
+        
+        .calculator-tabs {
+            display: flex;
+            background: #f8f9fa;
+            border-bottom: 1px solid #dee2e6;
+        }
+        
+        .tab {
+            flex: 1;
+            padding: 20px;
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            position: relative;
+        }
+        
+        .tab:hover {
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        .tab.active {
+            background: white;
+            color: #667eea;
+        }
+        
+        .tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 3px;
+            background: #667eea;
+        }
+        
+        .tab-content {
+            display: none;
+            padding: 40px;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Basic Calculator Styles */
+        .display {
+            width: 100%;
+            padding: 20px;
+            font-size: 2em;
+            text-align: right;
+            border: 2px solid #e9ecef;
+            border-radius: 15px;
+            margin-bottom: 25px;
+            background: #f8f9fa;
+            font-family: 'Courier New', monospace;
+            min-height: 70px;
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+        }
+        
+        .calculator-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        
+        .calc-btn {
+            padding: 20px;
+            font-size: 20px;
+            border: none;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .calc-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+        
+        .calc-btn:active {
+            transform: translateY(0);
+        }
+        
+        .calc-btn.number {
+            background: #f8f9fa;
+            color: #495057;
+        }
+        
+        .calc-btn.operator {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .calc-btn.equals {
+            background: linear-gradient(135deg, #56ab2f 0%, #a8e6cf 100%);
+            color: white;
+        }
+        
+        .calc-btn.clear {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+        }
+        
+        /* BMI Calculator Styles */
+        .bmi-form {
+            max-width: 500px;
+            margin: 0 auto;
+        }
+        
+        .input-group {
+            margin-bottom: 25px;
+        }
+        
+        .input-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #495057;
+            font-size: 16px;
+        }
+        
+        .input-group input,
+        .input-group select {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e9ecef;
+            border-radius: 10px;
+            font-size: 16px;
+            transition: border-color 0.3s ease;
+            background: white;
+        }
+        
+        .input-group input:focus,
+        .input-group select:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .input-group input.error {
+            border-color: #e74c3c;
+            box-shadow: 0 0 0 3px rgba(231, 76, 60, 0.1);
+        }
+        
+        .height-inputs {
+            display: flex;
+            gap: 15px;
+        }
+        
+        .height-inputs input {
+            flex: 1;
+        }
+        
+        .input-hint {
+            font-size: 12px;
+            color: #6c757d;
+            margin-top: 5px;
+        }
+        
+        .submit-btn {
+            width: 100%;
+            padding: 18px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-top: 20px;
+        }
+        
+        .submit-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+        
+        .submit-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
+        .result {
+            margin-top: 30px;
+            padding: 25px;
+            border-radius: 15px;
+            text-align: center;
+            display: none;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .result h3 {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .result p {
+            font-size: 1.1em;
+            margin-bottom: 8px;
+        }
+        
+        .result .advice {
+            font-style: italic;
+            opacity: 0.9;
+            margin-top: 15px;
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+            color: white;
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .container {
+                margin: 10px;
+                border-radius: 15px;
+            }
+            
+            .header h1 {
+                font-size: 2em;
+            }
+            
+            .calculator-grid {
+                gap: 10px;
+            }
+            
+            .calc-btn {
+                padding: 15px;
+                font-size: 18px;
+            }
+            
+            .display {
+                font-size: 1.5em;
+                padding: 15px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-calculator"></i> Multi-Function Calculator</h1>
+            <p>Your all-in-one calculation tool</p>
+        </div>
+        
+        <div class="calculator-tabs">
+            <button class="tab active" onclick="showTab('basic')">
+                <i class="fas fa-calculator"></i> Basic Calculator
+            </button>
+            <button class="tab" onclick="showTab('bmi')">
+                <i class="fas fa-weight"></i> BMI Calculator
+            </button>
+        </div>
+
+        <!-- Basic Calculator Tab -->
+        <div id="basic" class="tab-content active">
+            <div class="display" id="display">0</div>
+            <div class="calculator-grid">
+                <button class="calc-btn clear" onclick="clearDisplay()">C</button>
+                <button class="calc-btn clear" onclick="deleteLast()">⌫</button>
+                <button class="calc-btn operator" onclick="appendToDisplay('/')">/</button>
+                <button class="calc-btn operator" onclick="calculateSqrt()">√</button>
+                
+                <button class="calc-btn number" onclick="appendToDisplay('7')">7</button>
+                <button class="calc-btn number" onclick="appendToDisplay('8')">8</button>
+                <button class="calc-btn number" onclick="appendToDisplay('9')">9</button>
+                <button class="calc-btn operator" onclick="appendToDisplay('*')">×</button>
+                
+                <button class="calc-btn number" onclick="appendToDisplay('4')">4</button>
+                <button class="calc-btn number" onclick="appendToDisplay('5')">5</button>
+                <button class="calc-btn number" onclick="appendToDisplay('6')">6</button>
+                <button class="calc-btn operator" onclick="appendToDisplay('-')">-</button>
+                
+                <button class="calc-btn number" onclick="appendToDisplay('1')">1</button>
+                <button class="calc-btn number" onclick="appendToDisplay('2')">2</button>
+                <button class="calc-btn number" onclick="appendToDisplay('3')">3</button>
+                <button class="calc-btn operator" onclick="appendToDisplay('+')">+</button>
+                
+                <button class="calc-btn number" onclick="appendToDisplay('0')">0</button>
+                <button class="calc-btn number" onclick="appendToDisplay('.')">.</button>
+                <button class="calc-btn operator" onclick="appendToDisplay('^')">^</button>
+                <button class="calc-btn equals" onclick="calculateResult()">=</button>
+            </div>
+        </div>
+
+        <!-- BMI Calculator Tab -->
+        <div id="bmi" class="tab-content">
+            <form id="bmiForm" class="bmi-form">
+                <div class="input-group">
+                    <label for="weight"><i class="fas fa-weight-hanging"></i> Weight:</label>
+                    <input type="number" id="weight" step="0.1" required min="1" max="1000">
+                    <select id="weightUnit">
+                        <option value="kg">Kilograms (kg)</option>
+                        <option value="lbs">Pounds (lbs)</option>
+                    </select>
+                    <div class="input-hint">Enter weight between 1-1000</div>
+                </div>
+                
+                <div class="input-group">
+                    <label for="heightUnit"><i class="fas fa-ruler-vertical"></i> Height Unit:</label>
+                    <select id="heightUnit" onchange="toggleHeightInputs()">
+                        <option value="m">Meters</option>
+                        <option value="cm">Centimeters</option>
+                        <option value="ft">Feet & Inches</option>
+                    </select>
+                </div>
+                
+                <div id="heightInputs" class="input-group">
+                    <label for="height">Height:</label>
+                    <input type="number" id="height" step="0.01" min="0.3" max="3">
+                    <div class="input-hint" id="heightHint">Enter height between 0.3-3 meters</div>
+                </div>
+                
+                <div id="feetInchesInputs" class="input-group" style="display: none;">
+                    <label>Height (Feet & Inches):</label>
+                    <div class="height-inputs">
+                        <input type="number" id="feet" placeholder="Feet" min="1" max="8">
+                        <input type="number" id="inches" placeholder="Inches" min="0" max="11">
+                    </div>
+                    <div class="input-hint">Enter feet (1-8) and inches (0-11)</div>
+                </div>
+                
+                <button type="submit" class="submit-btn">
+                    <i class="fas fa-calculator"></i> Calculate BMI
+                </button>
+            </form>
+            
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Calculating your BMI...</p>
+            </div>
+            
+            <div id="bmiResult" class="result"></div>
+        </div>
+    </div>
+
+    <script>
+        function showTab(tabName) {
+            const tabs = document.querySelectorAll('.tab');
+            const contents = document.querySelectorAll('.tab-content');
+            
+            tabs.forEach(tab => tab.classList.remove('active'));
+            contents.forEach(content => content.classList.remove('active'));
+            
+            document.querySelector(`[onclick="showTab('${tabName}')"]`).classList.add('active');
+            document.getElementById(tabName).classList.add('active');
+        }
+
+        // Basic Calculator Functions
+        function appendToDisplay(value) {
+            const display = document.getElementById('display');
+            if (display.textContent === '0' && value !== '.') {
+                display.textContent = value;
+            } else {
+                display.textContent += value;
+            }
+        }
+
+        function clearDisplay() {
+            document.getElementById('display').textContent = '0';
+        }
+
+        function deleteLast() {
+            const display = document.getElementById('display');
+            if (display.textContent.length > 1) {
+                display.textContent = display.textContent.slice(0, -1);
+            } else {
+                display.textContent = '0';
+            }
+        }
+
+        function calculateResult() {
+            const display = document.getElementById('display');
+            try {
+                let expression = display.textContent
+                    .replace(/×/g, '*')
+                    .replace(/\^/g, '**');
+                const result = eval(expression);
+                display.textContent = result;
+            } catch (error) {
+                display.textContent = 'Error';
+                setTimeout(() => {
+                    display.textContent = '0';
+                }, 2000);
+            }
+        }
+
+        function calculateSqrt() {
+            const display = document.getElementById('display');
+            try {
+                const value = parseFloat(display.textContent);
+                if (value < 0) {
+                    display.textContent = 'Error';
+                    setTimeout(() => {
+                        display.textContent = '0';
+                    }, 2000);
+                } else {
+                    display.textContent = Math.sqrt(value);
+                }
+            } catch (error) {
+                display.textContent = 'Error';
+                setTimeout(() => {
+                    display.textContent = '0';
+                }, 2000);
+            }
+        }
+
+        // BMI Calculator Functions
+        function toggleHeightInputs() {
+            const heightUnit = document.getElementById('heightUnit').value;
+            const heightInputs = document.getElementById('heightInputs');
+            const feetInchesInputs = document.getElementById('feetInchesInputs');
+            const heightInput = document.getElementById('height');
+            const heightHint = document.getElementById('heightHint');
+            
+            if (heightUnit === 'ft') {
+                heightInputs.style.display = 'none';
+                feetInchesInputs.style.display = 'block';
+                heightInput.required = false;
+                document.getElementById('feet').required = true;
+                document.getElementById('inches').required = true;
+            } else {
+                heightInputs.style.display = 'block';
+                feetInchesInputs.style.display = 'none';
+                heightInput.required = true;
+                document.getElementById('feet').required = false;
+                document.getElementById('inches').required = false;
+                
+                // Update input constraints and hints based on unit
+                if (heightUnit === 'cm') {
+                    heightInput.min = '30';
+                    heightInput.max = '300';
+                    heightInput.step = '1';
+                    heightHint.textContent = 'Enter height between 30-300 centimeters';
+                } else if (heightUnit === 'm') {
+                    heightInput.min = '0.3';
+                    heightInput.max = '3';
+                    heightInput.step = '0.01';
+                    heightHint.textContent = 'Enter height between 0.3-3 meters';
+                }
+            }
+        }
+
+        // Form validation
+        function validateForm() {
+            const weight = document.getElementById('weight').value;
+            const heightUnit = document.getElementById('heightUnit').value;
+            
+            if (!weight || parseFloat(weight) <= 0) {
+                return 'Please enter a valid weight';
+            }
+            
+            if (heightUnit === 'ft') {
+                const feet = document.getElementById('feet').value;
+                const inches = document.getElementById('inches').value;
+                
+                if (!feet || !inches || parseFloat(feet) <= 0 || parseFloat(inches) < 0) {
+                    return 'Please enter valid feet and inches';
+                }
+            } else {
+                const height = document.getElementById('height').value;
+                if (!height || parseFloat(height) <= 0) {
+                    return 'Please enter a valid height';
+                }
+            }
+            
+            return null;
+        }
+
+        document.getElementById('bmiForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            // Validate form before submission
+            const validationError = validateForm();
+            if (validationError) {
+                showError(validationError);
+                return;
+            }
+            
+            const loading = document.getElementById('loading');
+            const resultDiv = document.getElementById('bmiResult');
+            const submitBtn = document.querySelector('.submit-btn');
+            
+            // Show loading and disable button
+            loading.style.display = 'block';
+            resultDiv.style.display = 'none';
+            submitBtn.disabled = true;
+            
+            try {
+                const weight = document.getElementById('weight').value;
+                const weightUnit = document.getElementById('weightUnit').value;
+                const heightUnit = document.getElementById('heightUnit').value;
+                
+                let requestData = {
+                    weight: parseFloat(weight),
+                    weight_unit: weightUnit,
+                    height_unit: heightUnit
+                };
+                
+                if (heightUnit === 'ft') {
+                    const feet = document.getElementById('feet').value;
+                    const inches = document.getElementById('inches').value;
+                    
+                    requestData.feet = parseFloat(feet);
+                    requestData.inches = parseFloat(inches);
+                    requestData.height = 0;
+                } else {
+                    const height = document.getElementById('height').value;
+                    requestData.height = parseFloat(height);
+                }
+                
+                console.log('Sending request:', requestData);
+                
+                const response = await fetch('/calculate_bmi', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify(requestData)
+                });
+                
+                // Check if response is ok first
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                
+                // Check if response is JSON
+                const contentType = response.headers.get('content-type');
+                if (!contentType || !contentType.includes('application/json')) {
+                    throw new Error('Server returned non-JSON response');
+                }
+                
+                const data = await response.json();
+                console.log('Received response:', data);
+                
+                // Hide loading and enable button
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+                
+                if (data.success || data.bmi) {
+                    resultDiv.style.background = `linear-gradient(135deg, ${data.color} 0%, ${data.color}aa 100%)`;
+                    resultDiv.style.color = 'white';
+                    resultDiv.innerHTML = `
+                        <h3><i class="fas fa-chart-line"></i> Your BMI: ${data.bmi}</h3>
+                        <p><strong>Category:</strong> ${data.category}</p>
+                        <p><strong>Weight:</strong> ${data.weight_kg} kg | <strong>Height:</strong> ${data.height_m} m</p>
+                        <p class="advice"><i class="fas fa-lightbulb"></i> ${data.advice}</p>
+                    `;
+                    resultDiv.classList.remove('error');
+                } else {
+                    showError(data.error || 'Unknown error occurred');
+                }
+                
+                resultDiv.style.display = 'block';
+                
+            } catch (error) {
+                loading.style.display = 'none';
+                submitBtn.disabled = false;
+                
+                console.error('Error details:', error);
+                
+                let errorMessage = 'An unexpected error occurred';
+                if (error.message.includes('JSON')) {
+                    errorMessage = 'Server communication error. Please try again.';
+                } else if (error.message.includes('HTTP error')) {
+                    errorMessage = 'Server error. Please check your input and try again.';
+                } else {
+                    errorMessage = error.message || errorMessage;
+                }
+                
+                showError(errorMessage);
+            }
+        });
+
+        function showError(message) {
+            const resultDiv = document.getElementById('bmiResult');
+            resultDiv.style.background = 'linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%)';
+            resultDiv.style.color = 'white';
+            resultDiv.innerHTML = `<p><i class="fas fa-exclamation-triangle"></i> ${message}</p>`;
+            resultDiv.classList.add('error');
+            resultDiv.style.display = 'block';
+        }
+
+        // Initialize height inputs on page load
+        toggleHeightInputs();
+
+        // Keyboard support for basic calculator
+        document.addEventListener('keydown', (e) => {
+            if (document.getElementById('basic').classList.contains('active')) {
+                const key = e.key;
+                if ('0123456789.'.includes(key)) {
+                    appendToDisplay(key);
+                } else if ('+-*/'.includes(key)) {
+                    appendToDisplay(key === '*' ? '×' : key);
+                } else if (key === 'Enter' || key === '=') {
+                    calculateResult();
+                } else if (key === 'Escape' || key === 'c' || key === 'C') {
+                    clearDisplay();
+                } else if (key === 'Backspace') {
+                    deleteLast();
+                }
+            }
+        });
+    </script>
+</body>
+</html>
